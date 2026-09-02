@@ -46,7 +46,7 @@ const patients = [
       }
     ]
   },
-
+ 
   {
     id: "1002",
     firstName: "Henry",
@@ -91,7 +91,7 @@ const patients = [
       }
     ]
   },
-
+ 
   {
     id: "1003",
     firstName: "Jenny",
@@ -148,7 +148,7 @@ const patients = [
       }
     ]
   },
-
+ 
   {
     id: "1004",
     firstName: "Barbara",
@@ -193,7 +193,7 @@ const patients = [
       }
     ]
   },
-
+ 
   {
     id: "1005",
     firstName: "Jacob",
@@ -238,7 +238,7 @@ const patients = [
       }
     ]
   },
-
+ 
   // ------------------------------------------------------------
   // FILLER / DECOY PATIENTS
   // These records intentionally include similar names and DOBs.
@@ -247,33 +247,33 @@ const patients = [
   { id: "2002", firstName: "John", lastName: "Buttars", dob: "11/03/1962", medications: fillerMeds() },
   { id: "2003", firstName: "John", lastName: "Butters", dob: "08/20/1980", medications: fillerMeds() },
   { id: "2004", firstName: "Julie", lastName: "Buttars", dob: "04/15/1988", medications: fillerMeds() },
-
+ 
   { id: "2005", firstName: "Martha", lastName: "Jacobson", dob: "07/17/1947", medications: fillerMeds() },
   { id: "2006", firstName: "Henry", lastName: "Jacobson", dob: "03/14/1968", medications: fillerMeds() },
   { id: "2007", firstName: "Henry", lastName: "Jacobsen", dob: "07/17/1947", medications: fillerMeds() },
   { id: "2008", firstName: "Helen", lastName: "Jacobson", dob: "12/08/1950", medications: fillerMeds() },
-
+ 
   { id: "2009", firstName: "Jennifer", lastName: "Harding", dob: "06/04/1999", medications: fillerMeds() },
   { id: "2010", firstName: "Jenny", lastName: "Harding", dob: "06/04/1979", medications: fillerMeds() },
   { id: "2011", firstName: "Jenny", lastName: "Hardin", dob: "06/04/1999", medications: fillerMeds() },
   { id: "2012", firstName: "Jason", lastName: "Harding", dob: "10/21/1992", medications: fillerMeds() },
-
+ 
   { id: "2013", firstName: "Beverly", lastName: "Fisher", dob: "09/23/1975", medications: fillerMeds() },
   { id: "2014", firstName: "Barbara", lastName: "Fisher", dob: "01/30/1951", medications: fillerMeds() },
   { id: "2015", firstName: "Barbara", lastName: "Fischer", dob: "09/23/1975", medications: fillerMeds() },
   { id: "2016", firstName: "Brenda", lastName: "Fisher", dob: "05/12/1984", medications: fillerMeds() },
-
+ 
   { id: "2017", firstName: "Jason", lastName: "Atkinson", dob: "02/06/2000", medications: fillerMeds() },
   { id: "2018", firstName: "Jacob", lastName: "Atkinson", dob: "09/11/1978", medications: fillerMeds() },
   { id: "2019", firstName: "Jacob", lastName: "Atkins", dob: "02/06/2000", medications: fillerMeds() },
   { id: "2020", firstName: "Jamie", lastName: "Atkinson", dob: "07/25/1996", medications: fillerMeds() },
-
+ 
   { id: "2021", firstName: "Samuel", lastName: "Reed", dob: "02/06/2000", medications: fillerMeds() },
   { id: "2022", firstName: "Angela", lastName: "Morales", dob: "06/04/1999", medications: fillerMeds() },
   { id: "2023", firstName: "Thomas", lastName: "Fisher", dob: "08/20/1980", medications: fillerMeds() },
   { id: "2024", firstName: "Melissa", lastName: "Jacobson", dob: "09/23/1975", medications: fillerMeds() }
 ];
-
+ 
 function fillerMeds() {
   return [
     {
@@ -300,7 +300,7 @@ function fillerMeds() {
     }
   ];
 }
-
+ 
 const form = document.getElementById("patient-search-form");
 const firstNameInput = document.getElementById("first-name");
 const lastNameInput = document.getElementById("last-name");
@@ -308,14 +308,14 @@ const dobInput = document.getElementById("dob");
 const clearButton = document.getElementById("clear-search");
 const messageArea = document.getElementById("message-area");
 const patientResult = document.getElementById("patient-result");
-
+ 
 function normalizeName(value) {
   return value.trim().toLowerCase();
 }
-
+ 
 function formatDobInput(value) {
   const numbers = value.replace(/\D/g, "").slice(0, 8);
-
+ 
   if (numbers.length <= 2) return numbers;
   if (numbers.length <= 4) return numbers.slice(0, 2) + "/" + numbers.slice(2);
   return (
@@ -326,52 +326,63 @@ function formatDobInput(value) {
     numbers.slice(4)
   );
 }
-
+ 
 dobInput.addEventListener("input", () => {
   dobInput.value = formatDobInput(dobInput.value);
 });
-
+ 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
-
+ 
   const firstName = normalizeName(firstNameInput.value);
   const lastName = normalizeName(lastNameInput.value);
   const dob = dobInput.value.trim();
-
+ 
   messageArea.innerHTML = "";
   patientResult.innerHTML = "";
-
-  if (!firstName || !lastName || !dob) {
+ 
+  if (!firstName && !lastName && !dob) {
     showNotFound(
-      "Enter the patient's first name, last name, and date of birth before searching."
+      "Enter at least a first name, last name, or date of birth before searching."
     );
     return;
   }
-
-  const patient = patients.find(
-    (record) =>
-      normalizeName(record.firstName) === firstName &&
-      normalizeName(record.lastName) === lastName &&
-      record.dob === dob
-  );
-
-  if (!patient) {
+ 
+  const matches = patients.filter((record) => {
+    const firstMatches =
+      !firstName || normalizeName(record.firstName) === firstName;
+ 
+    const lastMatches =
+      !lastName || normalizeName(record.lastName) === lastName;
+ 
+    const dobMatches =
+      !dob || record.dob === dob;
+ 
+    return firstMatches && lastMatches && dobMatches;
+  });
+ 
+  if (matches.length === 0) {
     showNotFound(
-      "No patient matches all of the information entered. Verify the first name, last name, and date of birth, then try again."
+      "No patients match the information entered. Verify the patient's information and try again."
     );
     return;
   }
-
-  renderPatient(patient);
+ 
+  if (firstName && lastName && dob && matches.length === 1) {
+    renderPatient(matches[0]);
+    return;
+  }
+ 
+  renderPatientMatches(matches);
 });
-
+ 
 clearButton.addEventListener("click", () => {
   form.reset();
   messageArea.innerHTML = "";
   patientResult.innerHTML = "";
   firstNameInput.focus();
 });
-
+ 
 function showNotFound(message) {
   messageArea.innerHTML = `
     <div class="message-card error">
@@ -380,10 +391,10 @@ function showNotFound(message) {
     </div>
   `;
 }
-
+ 
 function statusClass(status) {
   const normalized = status.toLowerCase();
-
+ 
   if (normalized.includes("ready")) return "status-ready";
   if (
     normalized.includes("out of stock") ||
@@ -392,10 +403,84 @@ function statusClass(status) {
     return "status-danger";
   }
   if (normalized.includes("process")) return "status-warning";
-
+ 
   return "status-info";
 }
-
+ 
+function renderPatientMatches(matches) {
+  const rows = matches
+    .map(
+      (patient) => `
+        <tr>
+          <td>
+            <strong>${patient.firstName} ${patient.lastName}</strong>
+          </td>
+          <td>${patient.dob}</td>
+          <td>${patient.id}</td>
+          <td>
+            <button
+              type="button"
+              class="view-button"
+              data-patient-id="${patient.id}"
+            >
+              Open Patient
+            </button>
+          </td>
+        </tr>
+      `
+    )
+    .join("");
+ 
+  patientResult.innerHTML = `
+    <article class="patient-card">
+      <div class="patient-header">
+        <div>
+          <span class="patient-found">Search Results</span>
+          <h2>
+            ${matches.length}
+            Patient${matches.length === 1 ? "" : "s"} Found
+          </h2>
+          <p class="patient-meta">
+            Verify the patient's name and date of birth before opening the record.
+          </p>
+        </div>
+      </div>
+ 
+      <div class="medication-section">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Patient Name</th>
+                <th>Date of Birth</th>
+                <th>Patient ID</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+  `;
+ 
+  patientResult
+    .querySelectorAll("[data-patient-id]")
+    .forEach((button) => {
+      button.addEventListener("click", () => {
+        const patient = patients.find(
+          (record) => record.id === button.dataset.patientId
+        );
+ 
+        if (patient) {
+          renderPatient(patient);
+        }
+      });
+    });
+}
+ 
 function renderPatient(patient) {
   const medicationRows = patient.medications
     .map(
@@ -425,7 +510,7 @@ function renderPatient(patient) {
       `
     )
     .join("");
-
+ 
   patientResult.innerHTML = `
     <article class="patient-card">
       <div class="patient-header">
@@ -437,13 +522,13 @@ function renderPatient(patient) {
           </p>
         </div>
       </div>
-
+ 
       <div class="medication-section">
         <h3>Medications on File</h3>
         <p class="medication-instruction">
           Select the medication the patient is calling about.
         </p>
-
+ 
         <div class="table-wrap">
           <table>
             <thead>
@@ -462,10 +547,10 @@ function renderPatient(patient) {
         </div>
       </div>
     </article>
-
+ 
     <div id="medication-detail"></div>
   `;
-
+ 
   patientResult.querySelectorAll("[data-medication-index]").forEach((button) => {
     button.addEventListener("click", () => {
       const index = Number(button.dataset.medicationIndex);
@@ -473,10 +558,10 @@ function renderPatient(patient) {
     });
   });
 }
-
+ 
 function renderMedicationDetail(medication) {
   const detailArea = document.getElementById("medication-detail");
-
+ 
   detailArea.innerHTML = `
     <article class="detail-card">
       <div class="detail-top">
@@ -484,43 +569,44 @@ function renderMedicationDetail(medication) {
           <h3>${medication.name}</h3>
           <p class="detail-sig">${medication.sig}</p>
         </div>
-
+ 
         <span class="status-badge ${statusClass(medication.status)}">
           ${medication.status}
         </span>
       </div>
-
+ 
       <div class="detail-grid">
         <div class="detail-field">
           <span>Quantity</span>
           <strong>${medication.quantity}</strong>
         </div>
-
+ 
         <div class="detail-field">
           <span>Refills</span>
           <strong>${medication.refills}</strong>
         </div>
-
+ 
         <div class="detail-field">
           <span>Insurance</span>
           <strong>${medication.insurance}</strong>
         </div>
-
+ 
         <div class="detail-field">
           <span>Patient Cost</span>
           <strong>${medication.cost}</strong>
         </div>
       </div>
-
+ 
       <div class="tech-note">
         <strong>Technician Information</strong>
         ${medication.technicianInfo}
       </div>
     </article>
   `;
-
+ 
   detailArea.scrollIntoView({
     behavior: "smooth",
     block: "nearest"
   });
 }
+
